@@ -1,101 +1,154 @@
-import Image from "next/image";
+'use client'
+
+import { useState, useMemo } from 'react'
+import { Header, FilterOptions } from '../components/Header'
+import { MenuSection } from '../components/MenuSection'
+import { Footer } from '../components/Footer'
+
+interface MenuItem {
+  name: string
+  description?: string
+  price: string
+  isVegetarian?: boolean
+  isGlutenFree?: boolean
+  isSpicy?: boolean
+}
+
+interface MenuData {
+  [key: string]: MenuItem[]
+}
+export const menuData: Record<string, MenuItem[]> = {
+  "Momo's": [
+    { name: "Steam Momo's", description: "Delicately steamed dumplings filled with fresh vegetables or chicken.", price: "60", isVegetarian: true, isGlutenFree: false },
+    { name: "Fry Momo's", description: "Crispy fried dumplings with flavorful fillings.", price: "70", isVegetarian: true, isGlutenFree: false },
+    { name: "Kurkura Momo's", description: "Crunchy momo's coated with breadcrumbs, served with spicy chutney.", price: "100", isVegetarian: true, isGlutenFree: false },
+    { name: "Chilli Momo's", description: "Spicy stir-fried momo's in a tangy chilli sauce.", price: "100", isVegetarian: true, isGlutenFree: false, isSpicy: true },
+    { name: "Panner Fry Momo's", description: "Fried dumplings filled with soft paneer and spices.", price: "90", isVegetarian: true, isGlutenFree: false },
+    { name: "Tandoori Momo's", description: "Chargrilled momo's infused with smoky tandoori flavors.", price: "110", isVegetarian: true, isGlutenFree: false },
+    { name: "Malai Momo's", description: "Creamy and rich dumplings with a melt-in-your-mouth texture.", price: "130", isVegetarian: true, isGlutenFree: false }
+  ],
+  "Tea & Coffee": [
+    { name: "Tea", description: "Classic Indian chai made with fresh tea leaves and spices.", price: "15" },
+    { name: "Masala Tea", description: "Aromatic spiced tea with cardamom, ginger, and cinnamon.", price: "20" },
+    { name: "Coffee", description: "Rich and flavorful brewed coffee.", price: "30" },
+    { name: "Cold Drink", description: "Refreshing carbonated beverage (price based on MRP).", price: "MRP" },
+    { name: "Water", description: "Pure and clean bottled drinking water.", price: "MRP" }
+  ],
+  "Naan": [
+    { name: "Plain Naan", description: "Soft and fluffy traditional Indian bread.", price: "60", isVegetarian: true },
+    { name: "Butter Naan", description: "Naan topped with melted butter for extra flavor.", price: "60", isVegetarian: true },
+    { name: "Amritsari Naan", description: "Flavorful naan stuffed with spiced fillings, Amritsar style.", price: "60", isVegetarian: true },
+    { name: "Tandoori Roti", description: "Whole wheat bread cooked in a clay tandoor.", price: "15", isVegetarian: true },
+    { name: "Butter Tandoori Roti", description: "Tandoori roti brushed with fresh butter.", price: "20", isVegetarian: true }
+  ],
+  "Paneer": [
+    { name: "Chilli Paneer", description: "Spicy and tangy paneer stir-fried with bell peppers and onions.", price: "150", isVegetarian: true, isSpicy: true },
+    { name: "Paneer Tikka", description: "Marinated paneer chunks grilled to perfection.", price: "150", isVegetarian: true },
+    { name: "Chilli Mushroom", description: "Fiery mushrooms tossed in a savory chili sauce.", price: "130", isVegetarian: true },
+    { name: "Mushroom Tikka", description: "Tandoori mushrooms marinated in aromatic spices.", price: "150", isVegetarian: true }
+  ],
+  "Dosa": [
+    { name: "Plain Dosa", description: "Classic South Indian crispy rice crepe.", price: "60", isVegetarian: true },
+    { name: "Butter Dosa", description: "Plain dosa generously spread with butter.", price: "60", isVegetarian: true },
+    { name: "Masala Dosa", description: "Crispy dosa filled with spiced potato masala.", price: "80", isVegetarian: true },
+    { name: "Onion Dosa", description: "Dosa topped with caramelized onions for extra flavor.", price: "90", isVegetarian: true },
+    { name: "Paneer Dosa", description: "Dosa filled with flavorful paneer stuffing.", price: "130", isVegetarian: true },
+    { name: "Masoor Dosa", description: "Healthy dosa made with protein-rich lentils.", price: "130", isVegetarian: true },
+    { name: "Salad Roast Dosa", description: "Unique dosa stuffed with fresh salad and roasted veggies.", price: "150", isVegetarian: true },
+    { name: "Aahaar Special Dosa", description: "Signature dosa with a blend of premium fillings.", price: "150", isVegetarian: true }
+  ],
+  "Rice": [
+    { name: "Fried Rice Veg", description: "Fried rice tossed with fresh vegetables and soy sauce.", price: "70-40", isVegetarian: true },
+    { name: "Fried Rice Paneer", description: "Flavorful fried rice mixed with paneer and spices.", price: "90-50", isVegetarian: true },
+    { name: "Schezwan Fried Rice", description: "Spicy and tangy Schezwan-style fried rice.", price: "80-40", isVegetarian: true }
+  ],
+  "Snacks": [
+    { name: "Samosa Plate", description: "Golden-fried pastry pockets filled with spiced potatoes.", price: "40", isVegetarian: true },
+    { name: "Aloo Tikki", description: "Crispy spiced potato patties, a popular street food.", price: "50", isVegetarian: true },
+    { name: "French Fry", description: "Crispy golden fries, a perfect snack.", price: "70", isVegetarian: true }
+  ],
+  "Burger": [
+    { name: "Aloo Tikki Burger", description: "Classic burger with a crispy aloo tikki patty.", price: "40", isVegetarian: true },
+    { name: "Cheese Burger", description: "Juicy burger with melted cheese.", price: "50", isVegetarian: true },
+    { name: "Paneer Burger", description: "Burger with a soft paneer patty and fresh veggies.", price: "60", isVegetarian: true }
+  ]
+};
+
+
+export const calculateMaxPrice = (menuData: MenuData): number => {
+  let maxPrice = 0;
+
+  for (const category in menuData) {
+    menuData[category].forEach((item) => {
+      const itemPrice = typeof item.price === "number" ? item.price : parseFloat(item.price);
+      if (!isNaN(itemPrice) && itemPrice > maxPrice) {
+        maxPrice = itemPrice;
+      }
+    });
+  }
+
+  return maxPrice;
+};
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [searchTerm, setSearchTerm] = useState('')
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
+
+  const [filters, setFilters] = useState<FilterOptions>({ priceRange: [0, calculateMaxPrice(menuData)], categories: [] })
+
+  const filteredMenu = useMemo(() => {
+    return Object.entries(menuData).reduce((acc, [section, items]) => {
+      const filteredItems = items.filter(item => {
+        const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          item.description?.toLowerCase().includes(searchTerm.toLowerCase());
+
+        // Check if price is numeric, otherwise set to NaN
+        const price = isNaN(parseFloat(item.price)) ? NaN : parseFloat(item.price);
+
+        // Apply price range filter only if the price is numeric
+        const matchesPrice = !isNaN(price) && price >= filters.priceRange[0] && price <= filters.priceRange[1];
+
+        const matchesCategories = filters.categories.length === 0 || filters.categories.every(category => {
+          if (category === 'Vegetarian') return item.isVegetarian;
+          if (category === 'Gluten-Free') return item.isGlutenFree;
+          if (category === 'Spicy') return item.isSpicy;
+          return false;
+        });
+
+        return matchesSearch && matchesPrice && matchesCategories;
+      });
+
+      if (filteredItems.length > 0) {
+        acc[section] = filteredItems;
+      }
+
+      return acc;
+    }, {} as MenuData);
+  }, [searchTerm, filters, menuData]);
+
+  const handleSearch = (term: string) => {
+    setSearchTerm(term)
+  }
+
+  const handleFilter = (newFilters: FilterOptions) => {
+    setFilters(newFilters)
+  }
+  // f4f1e5
+  return (
+    <div className="min-h-screen flex flex-col bg-[#e1dfd5] text-gray-800 font-serif">
+      <Header onSearch={handleSearch} onFilter={handleFilter} />
+      <main className="flex-grow container mx-auto px-4 pt-4">
+        {Object.entries(filteredMenu).map(([section, items]) => (
+          <MenuSection key={section} title={section} items={items} />
+        ))}
+        {Object.keys(filteredMenu).length === 0 && (
+          <p className="text-center text-gray-500 mt-8">
+            No menu items match your search or filters.
+          </p>
+        )}
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      <Footer />
     </div>
-  );
+  )
 }
+
