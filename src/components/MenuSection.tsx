@@ -7,6 +7,8 @@ interface MenuSectionProps {
     description?: string
     price: string
     isVegetarian?: boolean
+    isGlutenFree?: boolean
+    isSpicy?: boolean
   }[]
 }
 

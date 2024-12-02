@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Search, Filter, X } from 'lucide-react'
 import { menuData, calculateMaxPrice } from '@/app/page'
+import Image from 'next/image'
 
 const categories = ['Vegetarian', 'Gluten-Free', 'Spicy']
 
@@ -16,33 +17,59 @@ export interface FilterOptions {
   categories: string[]
 }
 
+export interface Sections {
+  title: string
+  image: string
+}
+
 export function Header({ onSearch, onFilter }: HeaderProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [priceRange, setPriceRange] = useState<[number, number]>([0, calculateMaxPrice(menuData)])
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [isSearchActive, setIsSearchActive] = useState(false)
-  const [sections, setSections] = useState<string[]>([])
+  const [sections, setSections] = useState<Sections[]>([])
   const navRef = useRef<HTMLDivElement>(null)
-  const [activeSection, setActiveSection] = useState(sections[0])
-  console.log(sections)
+  const [activeSection, setActiveSection] = useState('')
 
   useEffect(() => {
     if (menuData) {
-      setSections(Object.keys(menuData))
+      const formattedSections = Object.entries(menuData).map(([title, { vectorImageUrl }]) => ({
+        title,
+        image: vectorImageUrl,
+      }));
+      setSections(formattedSections);
     }
-  }, [])
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + window.innerHeight / 2;
+      const sectionElements = sections.map(section => document.getElementById(section.title));
+
+      for (let i = sectionElements.length - 1; i >= 0; i--) {
+        const element = sectionElements[i];
+        if (element && element.offsetTop <= scrollPosition) {
+          setActiveSection(sections[i].title);
+          break;
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [sections]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const term = e.target.value
-    setSearchTerm(term)
-    onSearch(term)
-  }
+    const term = e.target.value;
+    setSearchTerm(term);
+    onSearch(term);
+  };
 
   const handleFilter = () => {
-    onFilter({ priceRange, categories: selectedCategories })
-    setIsFilterOpen(false)
-  }
+    onFilter({ priceRange, categories: selectedCategories });
+    setIsFilterOpen(false);
+  };
 
   const scrollToSection = (section: string) => {
     const element = document.getElementById(section);
@@ -65,14 +92,13 @@ export function Header({ onSearch, onFilter }: HeaderProps) {
       prev.includes(category)
         ? prev.filter(c => c !== category)
         : [...prev, category]
-    )
-  }
+    );
+  };
 
   return (
-    <header className="sticky top-0 z-50  backdrop-blur-sm shadow-sm" id="header">
+    <header className="sticky top-0 z-50 backdrop-blur-sm shadow-sm" id="header">
       <div className="container mx-auto px-4">
         <div className="flex flex-col">
-          {/* Header */}
           <div className="flex items-center justify-between py-4 border-b border-gray-700 bg-[#f4f1e5] shadow-lg rounded-lg">
             <h1
               className="text-3xl font-serif font-extrabold px-3 text-gray-900 uppercase tracking-wide leading-none"
@@ -100,30 +126,44 @@ export function Header({ onSearch, onFilter }: HeaderProps) {
               </button>
             </div>
           </div>
-
-          {/* Navigation Bar */}
           <nav
             className="py-3 border-t border-b border-gray-700 bg-[#f4f1e5] relative shadow-sm rounded-lg"
             ref={navRef}
           >
             <div className="flex space-x-4 overflow-x-auto px-4 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
-              {sections.map((section) => (
+              {sections.map(({ title, image }) => (
                 <button
-                  key={section}
-                  onClick={() => scrollToSection(section)}
-                  className={`px-4 py-2 whitespace-nowrap rounded-md font-serif font-medium uppercase tracking-wide ${activeSection === section
+                  key={title}
+                  onClick={() => scrollToSection(title)}
+                  className={`px-4 py-2 whitespace-nowrap rounded-md flex justify-center items-center font-serif font-medium uppercase tracking-wide ${activeSection === title
                     ? 'bg-gray-800 text-white shadow-inner'
                     : 'bg-transparent text-gray-800 hover:bg-gray-200 hover:text-gray-900'
                     } transition-all`}
-                  data-section={section}
                 >
-                  {section}
+                  {image && (
+                    <div
+                      className={`w-6 h-6 inline-block mr-2 rounded object-cover overflow-hidden ${activeSection === title ? 'bg-white' : ''
+                        }`}
+                      style={{
+                        filter: activeSection === title ? 'brightness(1.2)' : 'brightness(0.8)',
+                      }}
+                    >
+                      <Image
+                        src={image}
+                        alt={title}
+                        width={25}
+                        height={25}
+                        className="w-full h-full"
+                      />
+                    </div>
+                  )}
+
+                  {title}
                 </button>
               ))}
             </div>
           </nav>
         </div>
-
         {isSearchActive && (
           <div className="relative py-4">
             <input
@@ -137,8 +177,8 @@ export function Header({ onSearch, onFilter }: HeaderProps) {
               <button
                 className="absolute right-4 top-1/2 transform -translate-y-1/2 p-2 rounded-full hover:bg-gray-200 transition-colors"
                 onClick={() => {
-                  setSearchTerm('')
-                  onSearch('')
+                  setSearchTerm('');
+                  onSearch('');
                 }}
                 aria-label="Clear search"
               >
@@ -148,14 +188,11 @@ export function Header({ onSearch, onFilter }: HeaderProps) {
           </div>
         )}
       </div>
-
-
       {isFilterOpen && (
-        <div className="fixed inset-0 top-full bg-gray-800 h-screen bg-opacity-60 flex items-start justify-center z-50 ">
+        <div className="fixed inset-0 top-full bg-gray-800 h-screen bg-opacity-60 flex items-start justify-center z-50">
           <div className="bg-[#f4f1e5] p-6 rounded-lg w-full max-w-md text-gray-900 shadow-lg border border-gray-700">
             <h2 className="text-xl font-serif font-bold mb-4 text-gray-900">Filter Menu</h2>
             <div className="space-y-4">
-              {/* Price Range */}
               <div>
                 <label className="block mb-2 font-serif text-gray-800">
                   Price Range: ₹{priceRange[0]} - ₹{priceRange[1]}
@@ -163,15 +200,13 @@ export function Header({ onSearch, onFilter }: HeaderProps) {
                 <input
                   type="range"
                   min={0}
-                  max={50}
+                  max={calculateMaxPrice(menuData)}
                   step={1}
                   value={priceRange[1]}
                   onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
                   className="w-full h-2 bg-gray-400 rounded-lg appearance-none cursor-pointer focus:outline-none focus:ring focus:ring-gray-600"
                 />
               </div>
-
-              {/* Categories */}
               <div>
                 <p className="mb-2 font-serif text-gray-800">Categories</p>
                 <div className="space-y-2">
@@ -188,8 +223,6 @@ export function Header({ onSearch, onFilter }: HeaderProps) {
                   ))}
                 </div>
               </div>
-
-              {/* Action Buttons */}
               <div className="flex justify-end space-x-2 mt-4">
                 <button
                   onClick={() => setIsFilterOpen(false)}
@@ -208,7 +241,6 @@ export function Header({ onSearch, onFilter }: HeaderProps) {
           </div>
         </div>
       )}
-
     </header>
-  )
+  );
 }
