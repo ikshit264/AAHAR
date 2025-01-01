@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { Search, Filter, X } from 'lucide-react'
-import { menuData, calculateMaxPrice } from '@/app/page'
+import { menuData, calculateMaxPrice } from '@/data/Menu'
 import Image from 'next/image'
 
 const categories = ['Vegetarian', 'Gluten-Free', 'Spicy']
@@ -19,7 +19,7 @@ export interface FilterOptions {
 
 export interface Sections {
   title: string
-  image: string
+  image?: string
 }
 
 export function Header({ onSearch, onFilter }: HeaderProps) {
