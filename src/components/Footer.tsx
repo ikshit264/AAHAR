@@ -1,4 +1,4 @@
-import { Facebook, Instagram, Twitter } from 'lucide-react'
+import { FaFacebook, FaInstagram, FaTwitter } from 'react-icons/fa';
 
 export function Footer() {
   return (
@@ -11,13 +11,13 @@ export function Footer() {
           </div>
           <div className="flex space-x-4">
             <a href="#" className="hover:text-secondary transition-colors">
-              <Facebook className="h-6 w-6" />
+              <FaFacebook className="h-6 w-6" />
             </a>
             <a href="#" className="hover:text-secondary transition-colors">
-              <Instagram className="h-6 w-6" />
+              <FaInstagram className="h-6 w-6" />
             </a>
             <a href="#" className="hover:text-secondary transition-colors">
-              <Twitter className="h-6 w-6" />
+              <FaTwitter className="h-6 w-6" />
             </a>
           </div>
         </div>
@@ -26,6 +26,5 @@ export function Footer() {
         </div>
       </div>
     </footer>
-  )
+  );
 }
-

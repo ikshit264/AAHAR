@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Leaf, Wheat, Flame } from 'lucide-react'
+import { GiLeafSwirl, GiWheat, GiFlame } from 'react-icons/gi'
 
 interface MenuItemProps {
   name: string
@@ -24,9 +24,9 @@ export function MenuItem({ name, description, price, isVegetarian, isGlutenFree,
           <h3 className="text-lg font-serif font-bold text-gray-900 flex items-center">
             {name}
             <div className="flex ml-2 space-x-1">
-              {isVegetarian && <Leaf className="h-4 w-4 text-green-800" />}
-              {isGlutenFree && <Wheat className="h-4 w-4 text-yellow-800" />}
-              {isSpicy && <Flame className="h-4 w-4 text-red-800" />}
+              {isVegetarian && <GiLeafSwirl className="h-4 w-4 text-green-800" />}
+              {isGlutenFree && <GiWheat className="h-4 w-4 text-yellow-800" />}
+              {isSpicy && <GiFlame className="h-4 w-4 text-red-800" />}
             </div>
           </h3>
           <p className="text-sm font-serif text-gray-800 mt-1">{description}</p>

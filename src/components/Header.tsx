@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Search, Filter, X } from 'lucide-react'
+import { FaSearch, FaFilter, FaTimes } from 'react-icons/fa'
 import { menuData, calculateMaxPrice } from '@/data/Menu'
 import Image from 'next/image'
 
@@ -115,14 +115,14 @@ export function Header({ onSearch, onFilter }: HeaderProps) {
                 className="p-2 rounded-full hover:bg-[#eae6d9] bg-[#f4f1e5] border border-gray-700 transition-colors"
                 aria-label="Open filter menu"
               >
-                <Filter className="h-5 w-5 text-gray-700" />
+                <FaFilter className="h-5 w-5 text-gray-700" />
               </button>
               <button
                 onClick={() => setIsSearchActive(!isSearchActive)}
                 className="p-2 rounded-full hover:bg-[#eae6d9] bg-[#f4f1e5] border border-gray-700 transition-colors"
                 aria-label="Open search menu"
               >
-                <Search className="h-5 w-5 text-gray-700" />
+                <FaSearch className="h-5 w-5 text-gray-700" />
               </button>
             </div>
           </div>
@@ -182,7 +182,7 @@ export function Header({ onSearch, onFilter }: HeaderProps) {
                 }}
                 aria-label="Clear search"
               >
-                <X className="h-5 w-5" />
+                <FaTimes className="h-5 w-5" />
               </button>
             )}
           </div>
